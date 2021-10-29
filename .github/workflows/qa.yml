@@ -1,0 +1,39 @@
+name: quality-assurance
+on: [push]
+jobs:
+
+  check:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go_version:
+          - '~1.10.0'
+          - '~1.11.0'
+    env:
+      GOPATH: '/home/runner/work/httpcache/httpcache/go'
+      _GOMODULE: 'github.com/gregjones/httpcache'
+    defaults:
+      run:
+        working-directory: 'go/src/${{ env._GOMODULE }}'
+    steps:
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '${{ matrix.go_version }}'
+      - uses: actions/checkout@v2
+        with:
+          path: 'go/src/${{ env._GOMODULE }}'
+
+      - run: go get -t -v ./...
+      - run: go tool vet .
+      - run: go test -v -race ./...
+
+  gofmt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '~1.11.0'
+      - uses: actions/checkout@v2
+
+      - run: gofmt -w -s .
+      - run: git diff --exit-code
