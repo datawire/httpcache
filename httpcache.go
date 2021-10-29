@@ -129,6 +129,10 @@ func varyMatches(cachedResp *http.Response, req *http.Request) bool {
 	return true
 }
 
+func IsCacheable(req *http.Request) bool {
+	return (req.Method == "GET" || req.Method == "HEAD") && req.Header.Get("range") == ""
+}
+
 // RoundTrip takes a Request and returns a Response
 //
 // If there is a fresh Response already in cache, then it will be returned without connecting to
@@ -139,7 +143,7 @@ func varyMatches(cachedResp *http.Response, req *http.Request) bool {
 // will be returned.
 func (t *Transport) RoundTrip(req *http.Request) (resp *http.Response, err error) {
 	cacheKey := CacheKey(req)
-	cacheable := (req.Method == "GET" || req.Method == "HEAD") && req.Header.Get("range") == ""
+	cacheable := IsCacheable(req)
 	var cachedResp *http.Response
 	if cacheable {
 		cachedResp, err = CachedResponse(t.Cache, req)
