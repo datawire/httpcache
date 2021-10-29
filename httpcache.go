@@ -441,7 +441,7 @@ func getEndToEndHeaders(respHeaders http.Header) []string {
 	return endToEndHeaders
 }
 
-func canStore(reqCacheControl, respCacheControl cacheControl) (canStore bool) {
+func canStore(reqCacheControl, respCacheControl CacheControl) (canStore bool) {
 	if _, ok := respCacheControl["no-store"]; ok {
 		return false
 	}
@@ -476,11 +476,14 @@ func cloneRequest(r *http.Request) *http.Request {
 	return r2
 }
 
-type cacheControl map[string]string
+type CacheControl map[string]string
 
-func parseCacheControl(headers http.Header) cacheControl {
-	cc := cacheControl{}
-	ccHeader := headers.Get("Cache-Control")
+func parseCacheControl(headers http.Header) CacheControl {
+	return ParseCacheControl(headers.Get("Cache-Control"))
+}
+
+func ParseCacheControl(ccHeader string) CacheControl {
+	cc := CacheControl{}
 	for _, part := range strings.Split(ccHeader, ",") {
 		part = strings.Trim(part, " ")
 		if part == "" {
