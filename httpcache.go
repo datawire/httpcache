@@ -39,8 +39,8 @@ type Cache interface {
 	Delete(key string)
 }
 
-// cacheKey returns the cache key for req.
-func cacheKey(req *http.Request) string {
+// CacheKey returns the cache key for req.
+func CacheKey(req *http.Request) string {
 	if req.Method == http.MethodGet {
 		return req.URL.String()
 	} else {
@@ -51,7 +51,7 @@ func cacheKey(req *http.Request) string {
 // CachedResponse returns the cached http.Response for req if present, and nil
 // otherwise.
 func CachedResponse(c Cache, req *http.Request) (resp *http.Response, err error) {
-	cachedVal, ok := c.Get(cacheKey(req))
+	cachedVal, ok := c.Get(CacheKey(req))
 	if !ok {
 		return
 	}
@@ -138,7 +138,7 @@ func varyMatches(cachedResp *http.Response, req *http.Request) bool {
 // to give the server a chance to respond with NotModified. If this happens, then the cached Response
 // will be returned.
 func (t *Transport) RoundTrip(req *http.Request) (resp *http.Response, err error) {
-	cacheKey := cacheKey(req)
+	cacheKey := CacheKey(req)
 	cacheable := (req.Method == "GET" || req.Method == "HEAD") && req.Header.Get("range") == ""
 	var cachedResp *http.Response
 	if cacheable {
