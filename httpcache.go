@@ -14,6 +14,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -497,6 +498,19 @@ func ParseCacheControl(ccHeader string) CacheControl {
 		}
 	}
 	return cc
+}
+
+func (cc CacheControl) String() string {
+	directives := make([]string, 0, len(cc))
+	for k, v := range cc {
+		if v == "" {
+			directives = append(directives, k)
+		} else {
+			directives = append(directives, k+"="+v)
+		}
+	}
+	sort.Strings(directives)
+	return strings.Join(directives, ", ")
 }
 
 // headerAllCommaSepValues returns all comma-separated values (each
