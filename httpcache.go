@@ -14,6 +14,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -38,8 +39,8 @@ type Cache interface {
 	Delete(key string)
 }
 
-// cacheKey returns the cache key for req.
-func cacheKey(req *http.Request) string {
+// CacheKey returns the cache key for req.
+func CacheKey(req *http.Request) string {
 	if req.Method == http.MethodGet {
 		return req.URL.String()
 	} else {
@@ -50,7 +51,7 @@ func cacheKey(req *http.Request) string {
 // CachedResponse returns the cached http.Response for req if present, and nil
 // otherwise.
 func CachedResponse(c Cache, req *http.Request) (resp *http.Response, err error) {
-	cachedVal, ok := c.Get(cacheKey(req))
+	cachedVal, ok := c.Get(CacheKey(req))
 	if !ok {
 		return
 	}
@@ -128,6 +129,10 @@ func varyMatches(cachedResp *http.Response, req *http.Request) bool {
 	return true
 }
 
+func IsCacheable(req *http.Request) bool {
+	return (req.Method == "GET" || req.Method == "HEAD") && req.Header.Get("range") == ""
+}
+
 // RoundTrip takes a Request and returns a Response
 //
 // If there is a fresh Response already in cache, then it will be returned without connecting to
@@ -137,8 +142,8 @@ func varyMatches(cachedResp *http.Response, req *http.Request) bool {
 // to give the server a chance to respond with NotModified. If this happens, then the cached Response
 // will be returned.
 func (t *Transport) RoundTrip(req *http.Request) (resp *http.Response, err error) {
-	cacheKey := cacheKey(req)
-	cacheable := (req.Method == "GET" || req.Method == "HEAD") && req.Header.Get("range") == ""
+	cacheKey := CacheKey(req)
+	cacheable := IsCacheable(req)
 	var cachedResp *http.Response
 	if cacheable {
 		cachedResp, err = CachedResponse(t.Cache, req)
@@ -441,7 +446,7 @@ func getEndToEndHeaders(respHeaders http.Header) []string {
 	return endToEndHeaders
 }
 
-func canStore(reqCacheControl, respCacheControl cacheControl) (canStore bool) {
+func canStore(reqCacheControl, respCacheControl CacheControl) (canStore bool) {
 	if _, ok := respCacheControl["no-store"]; ok {
 		return false
 	}
@@ -476,11 +481,14 @@ func cloneRequest(r *http.Request) *http.Request {
 	return r2
 }
 
-type cacheControl map[string]string
+type CacheControl map[string]string
 
-func parseCacheControl(headers http.Header) cacheControl {
-	cc := cacheControl{}
-	ccHeader := headers.Get("Cache-Control")
+func parseCacheControl(headers http.Header) CacheControl {
+	return ParseCacheControl(headers.Get("Cache-Control"))
+}
+
+func ParseCacheControl(ccHeader string) CacheControl {
+	cc := CacheControl{}
 	for _, part := range strings.Split(ccHeader, ",") {
 		part = strings.Trim(part, " ")
 		if part == "" {
@@ -494,6 +502,19 @@ func parseCacheControl(headers http.Header) cacheControl {
 		}
 	}
 	return cc
+}
+
+func (cc CacheControl) String() string {
+	directives := make([]string, 0, len(cc))
+	for k, v := range cc {
+		if v == "" {
+			directives = append(directives, k)
+		} else {
+			directives = append(directives, k+"="+v)
+		}
+	}
+	sort.Strings(directives)
+	return strings.Join(directives, ", ")
 }
 
 // headerAllCommaSepValues returns all comma-separated values (each
