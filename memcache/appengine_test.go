@@ -6,16 +6,17 @@ package memcache
 import (
 	"testing"
 
-	"appengine/aetest"
+	"google.golang.org/appengine/v2/aetest"
+
 	"github.com/datawire/httpcache/test"
 )
 
 func TestAppEngine(t *testing.T) {
-	ctx, err := aetest.NewContext(nil)
+	ctx, done, err := aetest.NewContext()
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer ctx.Close()
+	defer done()
 
 	test.Cache(t, New(ctx))
 }

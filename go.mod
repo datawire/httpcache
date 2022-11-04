@@ -7,6 +7,7 @@ require (
 	github.com/gomodule/redigo v1.8.5
 	github.com/peterbourgon/diskv v2.0.1+incompatible
 	github.com/syndtr/goleveldb v1.0.0
+	google.golang.org/appengine/v2 v2.0.2
 )
 
 require github.com/google/btree v1.0.1 // indirect

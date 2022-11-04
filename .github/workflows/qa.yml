@@ -21,6 +21,26 @@ jobs:
       - run: go vet ./...
       - run: go test -v -race ./...
 
+  check-appengine:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go_version:
+          - '~1.15.0'
+          - '~1.16.0'
+          - '~1.17.0'
+          - '~1.18.0'
+          - '~1.19.0'
+    steps:
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '${{ matrix.go_version }}'
+      - uses: google-github-actions/setup-gcloud@v0
+      - run: gcloud components install app-engine-python app-engine-go cloud-datastore-emulator
+      - uses: actions/checkout@v2
+
+      - run: go test -v -race -tags=appengine ./memcache
+
   gofmt:
     runs-on: ubuntu-latest
     steps:
