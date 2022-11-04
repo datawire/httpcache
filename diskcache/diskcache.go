@@ -25,6 +25,12 @@ func (c *Cache) Get(key string) (resp []byte, ok bool) {
 	return resp, true
 }
 
+// Contains returns whether a response corresponding to key is present
+func (c *Cache) Contains(key string) bool {
+	key = keyToFilename(key)
+	return c.d.Has(key)
+}
+
 // Set saves a response to the cache as key
 func (c *Cache) Set(key string, resp []byte) {
 	key = keyToFilename(key)

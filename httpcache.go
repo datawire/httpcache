@@ -31,6 +31,9 @@ type Cache interface {
 	// Get returns the []byte representation of a cached response and a bool
 	// set to true if the value isn't empty
 	Get(key string) (responseBytes []byte, ok bool)
+	// Contains returns whether the cache contains a cached response; but
+	// does not count towards "usage" for the purposes of cache eviction.
+	Contains(key string) bool
 	// Set stores the []byte representation of a response against a key
 	Set(key string, responseBytes []byte)
 	// Delete removes the value associated with the key

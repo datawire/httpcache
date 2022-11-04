@@ -21,6 +21,12 @@ func (c *Cache) Get(key string) (resp []byte, ok bool) {
 	return resp, true
 }
 
+// Contains returns whether a response corresponding to key is present
+func (c *Cache) Contains(key string) bool {
+	ok, err := c.db.Has([]byte(key), nil)
+	return ok && err == nil
+}
+
 // Set saves a response to the cache as key
 func (c *Cache) Set(key string, resp []byte) {
 	c.db.Put([]byte(key), resp, nil)

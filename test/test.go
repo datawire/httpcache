@@ -14,6 +14,9 @@ func Cache(t *testing.T, cache httpcache.Cache) {
 	if ok {
 		t.Fatal("retrieved key before adding it")
 	}
+	if cache.Contains(key) {
+		t.Fatal("contains key before adding it")
+	}
 
 	val := []byte("some bytes")
 	cache.Set(key, val)
@@ -25,11 +28,17 @@ func Cache(t *testing.T, cache httpcache.Cache) {
 	if !bytes.Equal(retVal, val) {
 		t.Fatal("retrieved a different value than what we put in")
 	}
+	if !cache.Contains(key) {
+		t.Fatal("does not contain key we just added")
+	}
 
 	cache.Delete(key)
 
 	_, ok = cache.Get(key)
 	if ok {
 		t.Fatal("deleted key still present")
+	}
+	if cache.Contains(key) {
+		t.Fatal("still contains deleted key")
 	}
 }

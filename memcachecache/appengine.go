@@ -27,6 +27,11 @@ func (c *appengineCache) Get(key string) (resp []byte, ok bool) {
 	return item.Value, true
 }
 
+func (c *appengineCache) Contains(key string) bool {
+	_, ok := c.Get(key)
+	return ok
+}
+
 // Set saves a response to the cache as key.
 func (c *appengineCache) Set(key string, resp []byte) {
 	item := &memcache.Item{

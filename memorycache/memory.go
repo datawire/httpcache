@@ -20,6 +20,14 @@ func (c *cache) Get(key string) (resp []byte, ok bool) {
 	return resp, ok
 }
 
+// Contains returns whether the cache contains a cached response.
+func (c *cache) Contains(key string) bool {
+	c.mu.RLock()
+	_, ok := c.items[key]
+	c.mu.RUnlock()
+	return ok
+}
+
 // Set saves response resp to the cache with key
 func (c *cache) Set(key string, resp []byte) {
 	c.mu.Lock()

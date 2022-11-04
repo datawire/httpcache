@@ -27,6 +27,12 @@ func (c cache) Get(key string) (resp []byte, ok bool) {
 	return item, true
 }
 
+// Contains returns whether the cache contains a cached response.
+func (c cache) Contains(key string) bool {
+	ok, err := redis.Bool(c.Do("EXISTS", cacheKey(key)))
+	return ok && err == nil
+}
+
 // Set saves a response to the cache as key.
 func (c cache) Set(key string, resp []byte) {
 	c.Do("SET", cacheKey(key), resp)
