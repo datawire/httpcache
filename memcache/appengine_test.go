@@ -1,6 +1,3 @@
-//go:build appengine
-// +build appengine
-
 package memcache
 
 import (
@@ -18,5 +15,5 @@ func TestAppEngine(t *testing.T) {
 	}
 	defer done()
 
-	test.Cache(t, New(ctx))
+	test.Cache(t, NewWithAppEngine(ctx))
 }

@@ -1,21 +1,19 @@
-//go:build !appengine
-// +build !appengine
-
 // Package memcache provides an implementation of httpcache.Cache that uses
-// gomemcache to store cached responses.
+// memcache to store cached responses.
 //
-// When built for Google App Engine, this package will provide an
-// implementation that uses App Engine's memcache service.  See the
-// appengine.go file in this package for details.
+// New() and NewWithClient() connect to a normal memcache server;
+// NewWithAppEngine connects to Google App Engine memcache instance.
 package memcache
 
 import (
 	"github.com/bradfitz/gomemcache/memcache"
+
+	"github.com/datawire/httpcache"
 )
 
-// Cache is an implementation of httpcache.Cache that caches responses in a
-// memcache server.
-type Cache struct {
+// memcacheCache is an implementation of httpcache.Cache that caches responses
+// in a memcache server.
+type memcacheCache struct {
 	*memcache.Client
 }
 
@@ -26,7 +24,7 @@ func cacheKey(key string) string {
 }
 
 // Get returns the response corresponding to key if present.
-func (c *Cache) Get(key string) (resp []byte, ok bool) {
+func (c *memcacheCache) Get(key string) (resp []byte, ok bool) {
 	item, err := c.Client.Get(cacheKey(key))
 	if err != nil {
 		return nil, false
@@ -35,7 +33,7 @@ func (c *Cache) Get(key string) (resp []byte, ok bool) {
 }
 
 // Set saves a response to the cache as key.
-func (c *Cache) Set(key string, resp []byte) {
+func (c *memcacheCache) Set(key string, resp []byte) {
 	item := &memcache.Item{
 		Key:   cacheKey(key),
 		Value: resp,
@@ -44,18 +42,18 @@ func (c *Cache) Set(key string, resp []byte) {
 }
 
 // Delete removes the response with key from the cache.
-func (c *Cache) Delete(key string) {
+func (c *memcacheCache) Delete(key string) {
 	c.Client.Delete(cacheKey(key))
 }
 
-// New returns a new Cache using the provided memcache server(s) with equal
-// weight. If a server is listed multiple times, it gets a proportional amount
-// of weight.
-func New(server ...string) *Cache {
+// New returns a new httpcache.Cache using the provided memcache server(s) with
+// equal weight. If a server is listed multiple times, it gets a proportional
+// amount of weight.
+func New(server ...string) httpcache.Cache {
 	return NewWithClient(memcache.New(server...))
 }
 
-// NewWithClient returns a new Cache with the given memcache client.
-func NewWithClient(client *memcache.Client) *Cache {
-	return &Cache{client}
+// NewWithClient returns a new httpcache.Cache with the given memcache client.
+func NewWithClient(client *memcache.Client) httpcache.Cache {
+	return &memcacheCache{client}
 }
