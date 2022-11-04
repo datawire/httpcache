@@ -1,9 +1,9 @@
-// Package memcache provides an implementation of httpcache.Cache that uses
-// memcache to store cached responses.
+// Package memcachecache provides an implementation of httpcache.Cache
+// that uses memcache to store cached responses.
 //
 // New() and NewWithClient() connect to a normal memcache server;
 // NewWithAppEngine connects to Google App Engine memcache instance.
-package memcache
+package memcachecache
 
 import (
 	"github.com/bradfitz/gomemcache/memcache"

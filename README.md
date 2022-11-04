@@ -12,11 +12,13 @@ This project isn't actively maintained; it works for what I, and seemingly other
 Cache Backends
 --------------
 
-- The built-in 'memory' cache stores responses in an in-memory map.
+- [`github.com/datawire/httpcache/memorycache`](https://github.com/datawire/httpcache/tree/master/memorycache) provides a cache that stores responses in an in-memory map.
 - [`github.com/datawire/httpcache/diskcache`](https://github.com/datawire/httpcache/tree/master/diskcache) provides a filesystem-backed cache using the [diskv](https://github.com/peterbourgon/diskv) library.
-- [`github.com/datawire/httpcache/memcache`](https://github.com/datawire/httpcache/tree/master/memcache) provides memcache implementations, for both App Engine and 'normal' memcache servers.
-- [`sourcegraph.com/sourcegraph/s3cache`](https://sourcegraph.com/github.com/sourcegraph/s3cache) uses Amazon S3 for storage.
 - [`github.com/datawire/httpcache/leveldbcache`](https://github.com/datawire/httpcache/tree/master/leveldbcache) provides a filesystem-backed cache using [leveldb](https://github.com/syndtr/goleveldb/leveldb).
+- [`github.com/datawire/httpcache/memcachecache`](https://github.com/datawire/httpcache/tree/master/memcachecache) provides memcache implementations, for both App Engine and 'normal' memcache servers.
+- [`github.com/datawire/httpcache/rediscache`](https://github.com/datawire/httpcache/tree/master/rediscache) provides a potentially filesystem-backed cache using [redis](https://github.com/gomodule/redigo/redis).
+
+- [`sourcegraph.com/sourcegraph/s3cache`](https://sourcegraph.com/github.com/sourcegraph/s3cache) uses Amazon S3 for storage.
 - [`github.com/die-net/lrucache`](https://github.com/die-net/lrucache) provides an in-memory cache that will evict least-recently used entries.
 - [`github.com/die-net/lrucache/twotier`](https://github.com/die-net/lrucache/tree/master/twotier) allows caches to be combined, for example to use lrucache above with a persistent disk-cache.
 - [`github.com/birkelund/boltdbcache`](https://github.com/birkelund/boltdbcache) provides a BoltDB implementation (based on the [bbolt](https://github.com/coreos/bbolt) fork).

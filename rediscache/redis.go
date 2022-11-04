@@ -1,5 +1,5 @@
-// Package redis provides a redis interface for http caching.
-package redis
+// Package rediscache provides a redis interface for http caching.
+package rediscache
 
 import (
 	"github.com/datawire/httpcache"
