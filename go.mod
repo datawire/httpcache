@@ -1,4 +1,4 @@
-module github.com/gregjones/httpcache
+module github.com/datawire/httpcache
 
 go 1.15
 
