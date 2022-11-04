@@ -16,6 +16,8 @@ jobs:
       - uses: actions/setup-go@v2
         with:
           go-version: '${{ matrix.go_version }}'
+      - uses: shogo82148/actions-setup-redis@v1
+      - uses: niden/actions-memcached@v7
       - uses: actions/checkout@v2
 
       - run: go vet ./...
