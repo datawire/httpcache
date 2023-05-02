@@ -9,7 +9,6 @@ import (
 	"bufio"
 	"bytes"
 	"errors"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -18,6 +17,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/datawire/dlib/dlog"
 )
 
 const (
@@ -149,7 +150,7 @@ func (t *Transport) RoundTrip(req *http.Request) (resp *http.Response, err error
 		cachedResp, err = CachedResponse(t.Cache, req)
 	} else {
 		// Need to invalidate an existing value
-		fmt.Printf("HTTPCACHE %s %s invalidate existing cache value", req.Method, req.URL)
+		dlog.Debugf(req.Context(), "HTTPCACHE %s %s invalidate existing cache value", req.Method, req.URL)
 		t.Cache.Delete(cacheKey)
 	}
 
@@ -171,7 +172,7 @@ func (t *Transport) RoundTrip(req *http.Request) (resp *http.Response, err error
 			}
 
 			if freshness == stale {
-				fmt.Printf("HTTPCACHE: %s %s cached value stale", req.Method, req.URL)
+				dlog.Debugf(req.Context(), "HTTPCACHE: %s %s cached value stale", req.Method, req.URL)
 				var req2 *http.Request
 				// Add validators if caller hasn't already done so
 				etag := cachedResp.Header.Get("etag")
@@ -204,11 +205,11 @@ func (t *Transport) RoundTrip(req *http.Request) (resp *http.Response, err error
 			req.Method == "GET" && canStaleOnError(cachedResp.Header, req.Header) {
 			// In case of transport failure and stale-if-error activated, returns cached content
 			// when available
-			fmt.Printf("HTTPCACHE: %s %s server transport failed, using cached response", req.Method, req.URL)
+			dlog.Debugf(req.Context(), "HTTPCACHE: %s %s server transport failed, using cached response", req.Method, req.URL)
 			return cachedResp, nil
 		} else {
 			if err != nil || resp.StatusCode != http.StatusOK {
-				fmt.Printf("HTTPCACHE %s %s server returned non-200 status, deleting cache key", req.Method, req.URL)
+				dlog.Debugf(req.Context(), "HTTPCACHE %s %s server returned non-200 status, deleting cache key", req.Method, req.URL)
 				t.Cache.Delete(cacheKey)
 			}
 			if err != nil {
@@ -257,7 +258,7 @@ func (t *Transport) RoundTrip(req *http.Request) (resp *http.Response, err error
 			}
 		}
 	} else {
-		fmt.Printf("HTTPCACHE: %s %s not cachable, deleting cache key", req.Method, req.URL)
+		dlog.Debugf(req.Context(), "HTTPCACHE: %s %s not cachable, deleting cache key", req.Method, req.URL)
 		t.Cache.Delete(cacheKey)
 	}
 	return resp, nil
