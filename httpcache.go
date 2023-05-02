@@ -145,7 +145,6 @@ func IsCacheable(req *http.Request) bool {
 func (t *Transport) RoundTrip(req *http.Request) (resp *http.Response, err error) {
 	cacheKey := CacheKey(req)
 	cacheable := IsCacheable(req)
-	dlog.Debugf(req.Context(), "HTTPCACHE: %s %s cacheable: %v, cache key: %s", req.Method, req.URL, cacheable, cacheKey)
 	var cachedResp *http.Response
 	if cacheable {
 		cachedResp, err = CachedResponse(t.Cache, req)
@@ -169,7 +168,6 @@ func (t *Transport) RoundTrip(req *http.Request) (resp *http.Response, err error
 			// Can only use cached value if the new request doesn't Vary significantly
 			freshness := getFreshness(cachedResp.Header, req.Header)
 			if freshness == fresh {
-				dlog.Debugf(req.Context(), "HTTPCACHE: %s %s cached value fresh, returning cached response", req.Method, req.URL)
 				return cachedResp, nil
 			}
 
@@ -202,7 +200,6 @@ func (t *Transport) RoundTrip(req *http.Request) (resp *http.Response, err error
 			for _, header := range endToEndHeaders {
 				cachedResp.Header[header] = resp.Header[header]
 			}
-			dlog.Debugf(req.Context(), "HTTPCACHE: %s %s server returned StatusNotModified, using cached value", req.Method, req.URL)
 			resp = cachedResp
 		} else if (err != nil || (cachedResp != nil && resp.StatusCode >= 500)) &&
 			req.Method == "GET" && canStaleOnError(cachedResp.Header, req.Header) {
@@ -222,10 +219,8 @@ func (t *Transport) RoundTrip(req *http.Request) (resp *http.Response, err error
 	} else {
 		reqCacheControl := parseCacheControl(req.Header)
 		if _, ok := reqCacheControl["only-if-cached"]; ok {
-			dlog.Debugf(req.Context(), "HTTPCACHE: %s %s only-if-cached in request header and no cached response exists, returning gateway timeout", req.Method, req.URL)
 			resp = newGatewayTimeoutResponse(req)
 		} else {
-			dlog.Debugf(req.Context(), "HTTPCACHE: %s %s fetching response from server", req.Method, req.URL)
 			resp, err = transport.RoundTrip(req)
 			if err != nil {
 				return nil, err
@@ -252,7 +247,6 @@ func (t *Transport) RoundTrip(req *http.Request) (resp *http.Response, err error
 					resp.Body = ioutil.NopCloser(r)
 					respBytes, err := httputil.DumpResponse(&resp, true)
 					if err == nil {
-						dlog.Debugf(req.Context(), "HTTPCACHE: %s %s storing server response in cache", req.Method, req.URL)
 						t.Cache.Set(cacheKey, respBytes)
 					}
 				},
@@ -260,7 +254,6 @@ func (t *Transport) RoundTrip(req *http.Request) (resp *http.Response, err error
 		default:
 			respBytes, err := httputil.DumpResponse(resp, true)
 			if err == nil {
-				dlog.Debugf(req.Context(), "HTTPCACHE: %s %s storing server response in cache", req.Method, req.URL)
 				t.Cache.Set(cacheKey, respBytes)
 			}
 		}
