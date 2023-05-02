@@ -172,7 +172,6 @@ func (t *Transport) RoundTrip(req *http.Request) (resp *http.Response, err error
 			}
 
 			if freshness == stale {
-				dlog.Debugf(req.Context(), "HTTPCACHE: %s %s cached value stale", req.Method, req.URL)
 				var req2 *http.Request
 				// Add validators if caller hasn't already done so
 				etag := cachedResp.Header.Get("etag")
@@ -205,7 +204,6 @@ func (t *Transport) RoundTrip(req *http.Request) (resp *http.Response, err error
 			req.Method == "GET" && canStaleOnError(cachedResp.Header, req.Header) {
 			// In case of transport failure and stale-if-error activated, returns cached content
 			// when available
-			dlog.Debugf(req.Context(), "HTTPCACHE: %s %s server transport failed, using cached response", req.Method, req.URL)
 			return cachedResp, nil
 		} else {
 			if err != nil || resp.StatusCode != http.StatusOK {
